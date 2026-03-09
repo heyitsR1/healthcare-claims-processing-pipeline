@@ -66,11 +66,7 @@ public class JdbcClaimRepository implements ClaimRepository {
                     return claim;
                 }
                 return null;
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to find claim by ID: " + claimId, e);
-                // e.printStackTrace();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find claim by ID: " + claimId, e);
             // e.printStackTrace();
@@ -82,17 +78,13 @@ public class JdbcClaimRepository implements ClaimRepository {
         List<Claim> claims = new ArrayList<>();
         try (Connection conn = DatabaseConfig.getDataSource().getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-            try (
-                    ResultSet rs = stmt.executeQuery();) {
+            try (ResultSet rs = stmt.executeQuery();) {
 
                 while (rs.next()) {
                     Claim claim = buildClaimFromResultSet(rs);
                     claims.add(claim);
                 }
                 return claims;
-            } catch (SQLException e) {
-                throw new RuntimeException("Failed to find all claims: ", e);
-                // e.printStackTrace();
             }
 
         } catch (SQLException e) {
