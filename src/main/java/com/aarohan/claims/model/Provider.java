@@ -1,3 +1,5 @@
+package com.aarohan.claims.model;
+
 import java.time.LocalDateTime;
 
 public class Provider {
