@@ -5,10 +5,21 @@ import java.time.LocalDateTime;
 
 public class Member {
 
+    // CREATE TABLE members (
+    // member_id VARCHAR(50) PRIMARY KEY,
+    // name VARCHAR(255) NOT NULL,
+    // date_of_birth DATE NOT NULL,
+    // plan_type VARCHAR(50),
+    // eligibility_start DATE,
+    // eligibility_end DATE,
+    // status VARCHAR(20) NOT NULL,
+    // created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    // );
+
     private String memberId;
     private String name;
     private LocalDate dateOfBirth;
-    private String planType;
+    private MemberPlanType planType;
     private LocalDate eligibilityStart;
     private LocalDate eligibilityEnd;
     private MemberStatus status;
@@ -17,19 +28,13 @@ public class Member {
     private LocalDateTime createdAt;
 
     public Member(String memberId,
-                  String name,
-                  LocalDate dateOfBirth,
-                  String planType,
-                  LocalDate eligibilityStart,
-                  LocalDate eligibilityEnd,
-                  MemberStatus status) {
+            String name,
+            LocalDate dateOfBirth,
+            MemberStatus status) {
 
         this.memberId = memberId;
         this.name = name;
         this.dateOfBirth = dateOfBirth;
-        this.planType = planType;
-        this.eligibilityStart = eligibilityStart;
-        this.eligibilityEnd = eligibilityEnd;
         this.status = status;
     }
 
@@ -45,7 +50,7 @@ public class Member {
         return dateOfBirth;
     }
 
-    public String getPlanType() {
+    public MemberPlanType getPlanType() {
         return planType;
     }
 
@@ -63,6 +68,24 @@ public class Member {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    // kinda bad design ; creation date can be overriden; can be fixed using a
+    // builder Pattern
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setPlanType(MemberPlanType planType) {
+        this.planType = planType;
+    }
+
+    public void setEligibilityStart(LocalDate eligibilityStart) {
+        this.eligibilityStart = eligibilityStart;
+    }
+
+    public void setEligibilityEnd(LocalDate eligibilityEnd) {
+        this.eligibilityEnd = eligibilityEnd;
     }
 
 }

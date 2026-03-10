@@ -1,11 +1,12 @@
 package com.aarohan.claims.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ValidationResult {
     private boolean isValid;
-    private List<ValidationError> errors = new ArrayList<>();
+    private List<ValidationError> errors;
 
     public ValidationResult() {
         this.errors = new ArrayList<>();
@@ -30,6 +31,7 @@ public class ValidationResult {
     }
 
     public List<ValidationError> getErrors() {
-        return this.errors;
+        // safety against accidental mutation
+        return Collections.unmodifiableList(this.errors);
     }
 }
