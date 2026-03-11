@@ -50,7 +50,8 @@ public class JdbcClaimRepository implements ClaimRepository {
             }
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Somethign went wrong while saving claim", e);
+            // e.printStackTrace();
         }
     }
 

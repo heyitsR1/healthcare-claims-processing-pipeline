@@ -18,25 +18,23 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-
 public class ClaimRepositoryTest {
 
     private ClaimRepository repository;
     private Connection testConnection;
-
 
     @Before
     public void setUp() throws SQLException {
         repository = new JdbcClaimRepository();
         testConnection = DatabaseConfig.getDataSource().getConnection();
         testConnection.setAutoCommit(false);
-        
+
         // Clean up test data first
         String deleteClaimsSql = "DELETE FROM claims WHERE claim_id LIKE 'TEST_%'";
         try (PreparedStatement stmt = testConnection.prepareStatement(deleteClaimsSql)) {
             stmt.executeUpdate();
         }
-        
+
         // Insert test provider if it doesn't exist
         String insertProviderSql = "INSERT INTO providers (npi, name, specialty, network_status) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING";
         try (PreparedStatement stmt = testConnection.prepareStatement(insertProviderSql)) {
@@ -62,9 +60,10 @@ public class ClaimRepositoryTest {
                         }
                     }
                 }
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
         }
-        
+
         // Insert test member if it doesn't exist
         String insertMemberSql = "INSERT INTO members (member_id, name, date_of_birth, plan_type, status) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = testConnection.prepareStatement(insertMemberSql)) {
@@ -77,7 +76,7 @@ public class ClaimRepositoryTest {
         } catch (SQLException e) {
             // Member may already exist, which is fine
         }
-        
+
         testConnection.commit();
     }
 
@@ -106,17 +105,17 @@ public class ClaimRepositoryTest {
     public void shouldSaveValidClaim() throws SQLException {
         // GIVEN: A valid test claim
         Claim testClaim = new Claim(
-            "TEST_CLM001",           // claim ID (prefixed with TEST_ for cleanup)
-            "MEM123",                // member ID (must exist in members table or FK will fail)
-            "1234567890",            // provider NPI (must exist in providers table or FK will fail)
-            LocalDate.of(2025, 3, 1), // service date
-            new BigDecimal("1500.00"), // billed amount
-            ClaimStatus.PENDING      // status
+                "TEST_CLM001", // claim ID (prefixed with TEST_ for cleanup)
+                "MEM123", // member ID (must exist in members table or FK will fail)
+                "1234567890", // provider NPI (must exist in providers table or FK will fail)
+                LocalDate.of(2025, 3, 1), // service date
+                new BigDecimal("1500.00"), // billed amount
+                ClaimStatus.PENDING // status
         );
-        
+
         // WHEN: We save the claim
         repository.save(testClaim);
-        
+
         // THEN: We should be able to retrieve it and verify it matches
         Claim retrieved = repository.findById("TEST_CLM001");
         assertNotNull("Claim should exist in database", retrieved);
@@ -136,7 +135,7 @@ public class ClaimRepositoryTest {
     public void shouldReturnNullWhenClaimNotFound() {
         // WHEN: We search for a claim that doesn't exist
         Claim result = repository.findById("NONEXISTENT_CLAIM");
-        
+
         // THEN: Should return null (not throw exception)
         assertNull("Should return null when claim not found", result);
     }
@@ -149,48 +148,50 @@ public class ClaimRepositoryTest {
      * - When: We call findAll()
      * - Then: List should contain all our test claims
      * 
-     * IMPORTANT: This test assumes other tests might leave data or 
+     * IMPORTANT: This test assumes other tests might leave data or
      * you might count only TEST_ prefixed claims
      */
     @Test
     public void shouldReturnAllClaims() throws SQLException {
         // GIVEN: Insert multiple test claims
-        Claim claim1 = new Claim("TEST_CLM002", "MEM123", "1234567890", 
-            LocalDate.of(2025, 3, 1), new BigDecimal("1500.00"), ClaimStatus.PENDING);
-        Claim claim2 = new Claim("TEST_CLM003", "MEM123", "1234567890", 
-            LocalDate.of(2025, 3, 2), new BigDecimal("2000.00"), ClaimStatus.VALID);
-        
+        Claim claim1 = new Claim("TEST_CLM002", "MEM123", "1234567890",
+                LocalDate.of(2025, 3, 1), new BigDecimal("1500.00"), ClaimStatus.PENDING);
+        Claim claim2 = new Claim("TEST_CLM003", "MEM123", "1234567890",
+                LocalDate.of(2025, 3, 2), new BigDecimal("2000.00"), ClaimStatus.VALID);
+
         repository.save(claim1);
         repository.save(claim2);
-        
+
         // WHEN: We call findAll()
         List<Claim> allClaims = repository.findAll();
-        
+
         // THEN: Should contain at least our 2 test claims
         assertNotNull("Claim list should not be null", allClaims);
         assertTrue("Should have at least 2 claims", allClaims.size() >= 2);
     }
 
     @Test
-    public void shouldHandleSaveWithOptionalFields() { 
-    
-        Claim testClaim = new Claim("TEST_CLM_004", "MEM123", "1234567890", LocalDate.of(2026,03 , 07), new BigDecimal("169.420"), ClaimStatus.PENDING);
-        testClaim.setDiagnosisCode("extra optional field here");
-        testClaim.setProcedureCode("PROC_TEST");
+    public void shouldHandleSaveWithOptionalFields() {
+
+        Claim testClaim = new Claim("TEST_CLM_004", "MEM123", "1234567890", LocalDate.of(2026, 03, 07),
+                new BigDecimal("169.420"), ClaimStatus.PENDING);
+        testClaim.setDiagnosisCode("extra");
+        testClaim.setProcedureCode("PROC_T");
 
         repository.save(testClaim);
 
         Claim retrievedClaim = repository.findById("TEST_CLM_004");
-        assertNotNull("Claim is saved to the db",retrievedClaim);
-        assertEquals ("Claim with optional fields should save to the database", testClaim.getMemberId(), retrievedClaim.getMemberId());
-        assertEquals ("service date should match", testClaim.getServiceDate(), retrievedClaim.getServiceDate());
-
+        assertNotNull("Claim is saved to the db", retrievedClaim);
+        assertEquals("Claim with optional fields should save to the database", testClaim.getMemberId(),
+                retrievedClaim.getMemberId());
+        assertEquals("service date should match", testClaim.getServiceDate(), retrievedClaim.getServiceDate());
 
     }
 
-    @Test 
-    public void shouldHandleNullDiagnosisCode() { 
-        Claim testClaim = new Claim("TEST_CLM_005", "MEM123", "1234567890", LocalDate.of(2026, 03, 07),new BigDecimal("124.344"), ClaimStatus.VALID);
+    @Test
+    public void shouldHandleNullDiagnosisCode() {
+        Claim testClaim = new Claim("TEST_CLM_005", "MEM123", "1234567890", LocalDate.of(2026, 03, 07),
+                new BigDecimal("124.344"), ClaimStatus.VALID);
         testClaim.setDiagnosisCode(null);
 
         repository.save(testClaim);
@@ -201,19 +202,16 @@ public class ClaimRepositoryTest {
 
     }
 
-    @Test 
-    public void shouldHandleLargeBilledAmount () { 
-        Claim testClaim = new Claim("TEST_CLM_006", "MEM123", "1234567890", LocalDate.of(2026, 03, 07),new BigDecimal("99999999.99"), ClaimStatus.VALID);
-        repository.save(testClaim); 
+    @Test
+    public void shouldHandleLargeBilledAmount() {
+        Claim testClaim = new Claim("TEST_CLM_006", "MEM123", "1234567890", LocalDate.of(2026, 03, 07),
+                new BigDecimal("99999999.99"), ClaimStatus.VALID);
+        repository.save(testClaim);
 
-        Claim retrievedClaim  = repository.findById("TEST_CLM_006");
-        assertEquals("Large Billed Amount is saved correctly", retrievedClaim.getBilledAmount(), testClaim.getBilledAmount()); 
- 
+        Claim retrievedClaim = repository.findById("TEST_CLM_006");
+        assertEquals("Large Billed Amount is saved correctly", retrievedClaim.getBilledAmount(),
+                testClaim.getBilledAmount());
+
     }
 
-      
 }
-
-    
-
-

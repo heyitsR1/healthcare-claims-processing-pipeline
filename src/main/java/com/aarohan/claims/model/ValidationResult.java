@@ -34,4 +34,11 @@ public class ValidationResult {
         // safety against accidental mutation
         return Collections.unmodifiableList(this.errors);
     }
+
+    public void merge(ValidationResult other) {
+        if (other == null)
+            return;
+        this.errors.addAll(other.errors);
+
+    }
 }
