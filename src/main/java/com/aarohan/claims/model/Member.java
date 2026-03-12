@@ -71,7 +71,8 @@ public class Member {
     }
 
     // kinda bad design ; creation date can be overriden; can be fixed using a
-    // builder Pattern
+    // builder Pattern ; future changes
+
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }

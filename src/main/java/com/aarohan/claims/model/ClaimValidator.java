@@ -4,14 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.aarohan.claims.repository.MemberRepository;
-import com.aarohan.claims.repository.ProviderRespository;
+import com.aarohan.claims.repository.ProviderRepository;
 
 public class ClaimValidator {
 
     private MemberRepository memberRepo;
-    private ProviderRespository providerRepo;
+    private ProviderRepository providerRepo;
 
-    public ClaimValidator(MemberRepository memberRepo, ProviderRespository providerRepo) {
+    public ClaimValidator(MemberRepository memberRepo, ProviderRepository providerRepo) {
         this.memberRepo = memberRepo;
         this.providerRepo = providerRepo;
     }

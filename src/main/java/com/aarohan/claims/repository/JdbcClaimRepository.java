@@ -30,7 +30,7 @@ public class JdbcClaimRepository implements ClaimRepository {
             stmt.setString(3, claim.getProviderNpi());
             stmt.setDate(4, Date.valueOf(claim.getServiceDate()));
             stmt.setBigDecimal(5, claim.getBilledAmount());
-            stmt.setString(6, claim.getStatus().toString());
+            stmt.setString(6, claim.getStatus().name());
 
             // optional fields
             if (claim.getDiagnosisCode() != null) {

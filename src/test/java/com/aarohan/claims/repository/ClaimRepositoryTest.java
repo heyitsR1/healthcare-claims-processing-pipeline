@@ -26,7 +26,7 @@ public class ClaimRepositoryTest {
     @Before
     public void setUp() throws SQLException {
         repository = new JdbcClaimRepository();
-        testConnection = DatabaseConfig.getDataSource().getConnection();
+        testConnection = DatabaseConfig.getConnection();
         testConnection.setAutoCommit(false);
 
         // Clean up test data first

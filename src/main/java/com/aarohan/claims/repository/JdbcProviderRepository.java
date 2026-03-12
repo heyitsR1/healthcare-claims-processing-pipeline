@@ -10,7 +10,7 @@ import com.aarohan.claims.config.DatabaseConfig;
 import com.aarohan.claims.model.Provider;
 import com.aarohan.claims.model.ProviderNetworkStatus;
 
-public class JdbcProviderRepository {
+public class JdbcProviderRepository implements ProviderRepository {
 
     // CREATE TABLE providers (
     // npi VARCHAR(10) PRIMARY KEY,
@@ -43,16 +43,53 @@ public class JdbcProviderRepository {
 
     }
 
+    public void save(Provider provider) {
+        String sql = "INSERT INTO providers (npi,name,specialty,network_status,created_at) VALUES (?,?,?,?,?)";
+
+        try (
+                Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);) {
+            stmt.setString(1, provider.getNpi());
+            stmt.setString(2, provider.getName());
+            stmt.setString(3, provider.getSpecialty());
+            stmt.setString(4, provider.getNetworkStatus().name());
+
+            if (provider.getCreatedAt() != null) {
+                stmt.setTimestamp(5, java.sql.Timestamp.valueOf(provider.getCreatedAt()));
+            } else {
+                stmt.setTimestamp(5, java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            }
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving provider to the database");
+        }
+
+    }
+
     private Provider buildProviderFromResultSet(ResultSet rs) throws SQLException {
         String npi = rs.getString("npi");
         String name = rs.getString("name");
-        String speciality = rs.getString("specialty");
         ProviderNetworkStatus networkStatus = ProviderNetworkStatus.valueOf(rs.getString("network_status"));
-        LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
+        String specialty;
+        LocalDateTime createdAt;
+
+        // null check for optional fields
+
+        if (rs.getTimestamp("created_at") != null) {
+            createdAt = rs.getTimestamp("created_at").toLocalDateTime();
+        } else {
+            createdAt = null;
+        }
+        if (rs.getString("specialty") != null) {
+            specialty = rs.getString("specialty");
+        } else {
+            specialty = null;
+        }
 
         Provider provider = new Provider(npi, name, networkStatus);
         provider.setCreatedAt(createdAt);
-        provider.setSpecialty(speciality);
+        provider.setSpecialty(specialty);
 
         return provider;
 
